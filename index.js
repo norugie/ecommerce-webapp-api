@@ -9,7 +9,6 @@ app.use(cors());
 app.use(express.json());
 app.use(
     fileUpload({
-        useTempFiles: true,
         safeFileNames: true,
         preserveExtension:true
     })
@@ -45,7 +44,7 @@ app.get('/products', (request, response) => {
 // Route for getting a product
 app.get('/products/:id', (request, response) => {
     const id = request.params.id;
-    console.log(id);
+
     db.query('SELECT * FROM products WHERE id = ?', id, (error, result) => {
         console.log(result);
         if (error) console.log(error);
@@ -59,13 +58,16 @@ app.post('/products/create', (request, response) => {
     const description = request.body.description;
     const price = request.body.price;
     const quantity = request.body.quantity;
-    const image = request.body.image;
     let imageName = '';
 
-    if (!image) imageName = 'product-placeholder.png';
+    if (!request.files || !request.files.image) imageName = 'product-placeholder.png';
     else {
-        imageName = image.name;
-        // Code for file upload here
+        let image = request.files.image;
+        imageName = `${Date.now()}_${image.name}`;
+        let path = `../ecommerce-webapp/src/assets/images/products/${imageName}`;
+        image.mv(path, (error) => {
+            if (error) console.log(error);
+        });
     }
 
     db.query('INSERT INTO products (name, description, price, quantity, image) VALUES (?, ?, ?, ?, ?)', [name, description, price, quantity, imageName], (error, result) => {
@@ -81,9 +83,21 @@ app.put('/products/:id/update', (request, response) => {
     const description = request.body.description;
     const price = request.body.price;
     const quantity = request.body.quantity;
-    const image = request.body.image;
 
-    db.query('UPDATE products SET name = ?, description = ?, price = ?, quantity = ?, image = ? WHERE id = ?', [name, description, price, quantity, image, id], (error, result) => {
+    if(request.files && request.files.image) {
+        let image = request.files.image;
+        let imageName = `${Date.now()}_${image.name}`;
+        let path = `../ecommerce-webapp/src/assets/images/products/${imageName}`;
+        image.mv(path, (error) => {
+            if (error) console.log(error);
+        });
+
+        db.query('UPDATE products SET image = ? WHERE id = ?', [imageName, id], (error, result) => {
+            if (error) console.log(error);
+        });
+    }
+
+    db.query('UPDATE products SET name = ?, description = ?, price = ?, quantity = ? WHERE id = ?', [name, description, price, quantity, id], (error, result) => {
         if (error) console.log(error);
         else response.send('Product has been updated.');
     });
@@ -93,7 +107,6 @@ app.put('/products/:id/update', (request, response) => {
 app.delete('/products/:id/delete', (request, response) => {
     const id = request.params.id;
 
-    console.log(id);
     db.query('DELETE FROM products WHERE id = ?', id, (error, result) => {
         if (error) console.log(error);
         else response.send(result);
