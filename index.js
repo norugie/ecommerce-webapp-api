@@ -52,45 +52,47 @@ app.get('/products/:id', (request, response) => {
     });
 });
 
+// Returns product object with all the non-image product info
+const product = (request) => {
+    const product = {
+        name: request.body.name,
+        description: request.body.description,
+        price: request.body.price,
+        quantity: request.body.quantity
+    }
+
+    return product;
+}
+
+// handles uploading image to designated uploads folder
+function moveImage (image) {
+    imageName = `${Date.now()}_${image.name}`;
+    let path = `../ecommerce-webapp/src/assets/images/products/${imageName}`;
+    image.mv(path, (error) => {
+        if (error) console.log(error);
+    });
+}
+
 // Route for creating a product
 app.post('/products/create', (request, response) => {
-    const name = request.body.name;
-    const description = request.body.description;
-    const price = request.body.price;
-    const quantity = request.body.quantity;
+    let { name, description, price, quantity } = product(request);
     let imageName = '';
 
     if (!request.files || !request.files.image) imageName = 'product-placeholder.png';
-    else {
-        let image = request.files.image;
-        imageName = `${Date.now()}_${image.name}`;
-        let path = `../ecommerce-webapp/src/assets/images/products/${imageName}`;
-        image.mv(path, (error) => {
-            if (error) console.log(error);
-        });
-    }
+    else  moveImage(request.files.image);
 
     db.query('INSERT INTO products (name, description, price, quantity, image) VALUES (?, ?, ?, ?, ?)', [name, description, price, quantity, imageName], (error, result) => {
         if (error) console.log(error);
-        else response.send('New product created.');
+        else response.send('A product created.');
     });
 });
 
 // Route for updating a product
 app.put('/products/:id/update', (request, response) => {
-    const id = request.params.id;
-    const name = request.body.name;
-    const description = request.body.description;
-    const price = request.body.price;
-    const quantity = request.body.quantity;
+    let { name, description, price, quantity } = product(request);
 
     if(request.files && request.files.image) {
-        let image = request.files.image;
-        let imageName = `${Date.now()}_${image.name}`;
-        let path = `../ecommerce-webapp/src/assets/images/products/${imageName}`;
-        image.mv(path, (error) => {
-            if (error) console.log(error);
-        });
+        moveImage(request.files.image);
 
         db.query('UPDATE products SET image = ? WHERE id = ?', [imageName, id], (error, result) => {
             if (error) console.log(error);
@@ -109,7 +111,7 @@ app.delete('/products/:id/delete', (request, response) => {
 
     db.query('DELETE FROM products WHERE id = ?', id, (error, result) => {
         if (error) console.log(error);
-        else response.send(result);
+        else response.send('A product has been deleted.');
     });
 });
 
