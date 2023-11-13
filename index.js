@@ -1,8 +1,10 @@
+const dotenv = require('dotenv');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 
+dotenv.config();
 const app = express();
 
 app.use(cors());
@@ -16,10 +18,10 @@ app.use(
 
 // Database variable
 const db = mysql.createConnection({
-    user: 'root',
-    host: 'localhost',
-    password: '',
-    database: 'ecommerce_webapp_api'
+    user: process.env.DB_USERNAME,
+    host: process.env.HOST,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE
 });
 
 // Route for signing in as admin
