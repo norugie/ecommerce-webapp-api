@@ -38,6 +38,7 @@ app.post('/login', (request, response) => {
 // Route for getting all products
 app.get('/products', (request, response) => {
     db.query('SELECT * FROM products', (error, result) => {
+        console.log(result);
         if (error) console.log(error);
         else response.send(result);
     });
@@ -91,6 +92,7 @@ app.post('/products/create', (request, response) => {
 
 // Route for updating a product
 app.put('/products/:id/update', (request, response) => {
+    const id = request.params.id;
     let { name, description, price, quantity } = product(request);
 
     if(request.files && request.files.image) {
