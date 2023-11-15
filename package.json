@@ -1,5 +1,6 @@
 {
   "name": "ecommerce-webapp-api",
+  "type": "module",
   "version": "1.0.0",
   "description": "A REST API project to connect to the ecommerce webapp project.",
   "main": "index.js",
