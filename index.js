@@ -1,8 +1,3 @@
-// const dotenv = require('dotenv');
-// const express = require('express');
-// const cors = require('cors');
-// const fileUpload = require('express-fileupload');
-
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -38,33 +33,6 @@ app.post('/login', async (request, response) => {
 
     response.status(200).send(user);
 });
-
-// // Route for creating a product
-// app.post('/products/create', async (request, response) => {
-//     const productData = {
-//         name: request.body.name,
-//         description: request.body.description,
-//         price: request.body.price,
-//         quantity: request.body.quantity
-//     }
-
-//     const image = await request.files.image;
-//     const imageName = `${Date.now()}_${image.name}`;
-//     let path = `../ecommerce-webapp/src/assets/images/products/${imageName}`;
-//     image.mv(path, (error) => {
-//         if (error) console.log(error);
-//     });
-    
-//     console.log(productData);
-//     // try {
-//     //     await createProduct(request)
-
-//     //     response.send('A new product has been created.');
-//     // } catch (error) {
-//     //     console.log(error);
-//     //     return null;
-//     // }
-// });
 
 app.use('/products', PRODUCT_ROUTES);
 
