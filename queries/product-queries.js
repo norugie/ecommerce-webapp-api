@@ -1,12 +1,12 @@
 import db from '../config/mysql.js';
 
 // Returns product object with all the non-image product info
-const productData = (request) => {
+const productData = (product) => {
     const productData = {
-        name: request.body.name,
-        description: request.body.description,
-        price: request.body.price,
-        quantity: request.body.quantity
+        name: product.body.name,
+        description: product.body.description,
+        price: product.body.price,
+        quantity: product.body.quantity
     }
 
     return productData;
@@ -14,8 +14,8 @@ const productData = (request) => {
 
 // Handles uploading image to designated uploads folder
 function moveImage (image) {
-    imageName = `${Date.now()}_${image.name}`;
-    let path = `../ecommerce-webapp/src/asset/${imageName}`;
+    let imageName = `${Date.now()}_${image.name}`;
+    let path = `../ecommerce-webapp/src/assets/images/products/${imageName}`;
     image.mv(path, (error) => {
         if (error) console.log(error);
     });
@@ -46,13 +46,12 @@ export const selectProduct = async (id) => {
 }
 
 export const createProduct = async (product) => {
-    let { name, description, price, quantity } = await productData(product);
-    let imageName = '';
-
-    if (!product.files || !product.files.image) imageName = 'product-placeholder.png';
-    else  imageName = moveImage(product.files.image);
-
     try {
+        let { name, description, price, quantity } = await productData(product);
+        let imageName = 'product-placeholder.png';
+    
+        if (product.files && product.files.image) imageName = moveImage(product.files.image);
+
         await db
         .query('INSERT INTO products (name, description, price, quantity, image) VALUES (?, ?, ?, ?, ?)', 
         [name, description, price, quantity, imageName], 
@@ -67,7 +66,25 @@ export const createProduct = async (product) => {
 
 export const updateProduct = async (id, product) => {
     try {
+        let { name, description, price, quantity } = await productData(product);
 
+        if(product.files && product.files.image) {
+            let imageName = moveImage(product.files.image);
+    
+            await db
+            .query('UPDATE products SET image = ? WHERE id = ?', 
+            [imageName, id], 
+            (error, result) => {
+                if (error) console.log(error);
+            });
+        }
+
+        await db
+        .query('UPDATE products SET name = ?, description = ?, price = ?, quantity = ? WHERE id = ?', 
+        [name, description, price, quantity, id], 
+        (error, result) => {
+            if (error) console.log(error);
+        });
     } catch (error) {
         console.log(error);
         return null;
@@ -76,7 +93,12 @@ export const updateProduct = async (id, product) => {
 
 export const deleteProduct = async (id) => {
     try {
-
+        await db
+        .query('DELETE FROM products WHERE id = ?', 
+        id, 
+        (error, result) => {
+            if (error) console.log(error);
+        });
     } catch (error) {
         console.log(error);
         return null;

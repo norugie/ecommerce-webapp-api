@@ -17,10 +17,8 @@ PRODUCT_ROUTES.get('/', async (request, response) => {
 
 // Route for getting a product
 PRODUCT_ROUTES.get('/:id', async (request, response) => {
-    const id = request.params.id;
-
     try {
-        const product = await selectProduct(id);
+        const product = await selectProduct(request.params.id);
 
         response.send(product);
     } catch (error) {
@@ -31,7 +29,6 @@ PRODUCT_ROUTES.get('/:id', async (request, response) => {
 
 // Route for creating a product
 PRODUCT_ROUTES.post('/create', async (request, response) => {
-    console.log(request.body);
     try {
         await createProduct(request)
 
@@ -42,31 +39,26 @@ PRODUCT_ROUTES.post('/create', async (request, response) => {
     }
 });
 
-// // Route for updating a product
-// PRODUCT_ROUTES.put('/:id/update', (request, response) => {
-//     const id = request.params.id;
-//     let { name, description, price, quantity } = product(request);
+// Route for updating a product
+PRODUCT_ROUTES.put('/:id/update', async (request, response) => {
+    try {
+        await updateProduct(request.params.id, request);
 
-//     if(request.files && request.files.image) {
-//         let imageName = moveImage(request.files.image);
+        response.send('A product has been updated.');
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+});
 
-//         db.query('UPDATE products SET image = ? WHERE id = ?', [imageName, id], (error, result) => {
-//             if (error) console.log(error);
-//         });
-//     }
+// Route for deleting a product
+PRODUCT_ROUTES.delete('/:id/delete', async (request, response) => {
+    try {
+        await deleteProduct(request.params.id);
 
-//     db.query('UPDATE products SET name = ?, description = ?, price = ?, quantity = ? WHERE id = ?', [name, description, price, quantity, id], (error, result) => {
-//         if (error) console.log(error);
-//         else response.send('Product has been updated.');
-//     });
-// });
-
-// // Route for deleting a product
-// PRODUCT_ROUTES.delete('/:id/delete', (request, response) => {
-//     const id = request.params.id;
-
-//     db.query('DELETE FROM products WHERE id = ?', id, (error, result) => {
-//         if (error) console.log(error);
-//         else response.send('A product has been deleted.');
-//     });
-// });
+        response.send('A product has been deleted.');
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+});
