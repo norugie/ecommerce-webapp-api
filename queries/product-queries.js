@@ -1,7 +1,7 @@
 import db from '../config/mysql.js';
 
 // Returns product object with all the non-image product info
-const productData = (product) => {
+const getProductData = (product) => {
     const productData = {
         name: product.body.name,
         description: product.body.description,
@@ -12,13 +12,14 @@ const productData = (product) => {
     return productData;
 }
 
-// Handles uploading image to designated uploads folder
-function moveImage (image) {
+// Returns an image name after handling image upload to designated uploads directory
+const getImageName = (image) => {
     let imageName = `${Date.now()}_${image.name}`;
     let path = `../ecommerce-webapp/src/assets/images/products/${imageName}`;
     image.mv(path, (error) => {
         if (error) console.log(error);
     });
+
     return imageName;
 }
 
@@ -47,11 +48,11 @@ export const selectProduct = async (id) => {
 
 export const createProduct = async (product) => {
     try {
-        let { name, description, price, quantity } = await productData(product);
+        let { name, description, price, quantity } = await getProductData(product);
         let imageName = 'product-placeholder.png';
     
         if (product.files && product.files.image) 
-            imageName = moveImage(product.files.image);
+            imageName = getImageName(product.files.image);
 
         await db
         .query('INSERT INTO products (name, description, price, quantity, image) VALUES (?, ?, ?, ?, ?)', 
@@ -67,10 +68,10 @@ export const createProduct = async (product) => {
 
 export const updateProduct = async (id, product) => {
     try {
-        let { name, description, price, quantity } = await productData(product);
+        let { name, description, price, quantity } = await getProductData(product);
 
         if(product.files && product.files.image) {
-            let imageName = moveImage(product.files.image);
+            let imageName = getImageName(product.files.image);
     
             await db
             .query('UPDATE products SET image = ? WHERE id = ?', 
