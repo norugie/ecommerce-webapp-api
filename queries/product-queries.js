@@ -26,7 +26,7 @@ function moveImage (image) {
 export const selectProducts = async () => {
     try {
         const [products] = await db.query('SELECT * FROM products');
-        console.log(products);
+
         return products;
     } catch (error) {
         console.log(error);
@@ -50,7 +50,8 @@ export const createProduct = async (product) => {
         let { name, description, price, quantity } = await productData(product);
         let imageName = 'product-placeholder.png';
     
-        if (product.files && product.files.image) imageName = moveImage(product.files.image);
+        if (product.files && product.files.image) 
+            imageName = moveImage(product.files.image);
 
         await db
         .query('INSERT INTO products (name, description, price, quantity, image) VALUES (?, ?, ?, ?, ?)', 
